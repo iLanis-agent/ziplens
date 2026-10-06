@@ -1,0 +1,371 @@
+{
+ "items": [
+  {
+   "file": "comment.zip",
+   "size": 127,
+   "entries": [
+    {
+     "name": "a.txt",
+     "method": 8,
+     "flags": 0,
+     "crc": 2943384164,
+     "csize": 6,
+     "usize": 100,
+     "lho": 0,
+     "comment": "",
+     "raw_time": 29033,
+     "raw_date": 23878,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "second": 18
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 35,
+     "local_name": "a.txt"
+    }
+   ],
+   "comment": "hello archive",
+   "eocd": {
+    "offset": 92,
+    "entries": 1,
+    "cd_size": 51,
+    "cd_offset": 41,
+    "comment": "hello archive",
+    "trailing": 0
+   },
+   "zip64": false
+  },
+  {
+   "file": "descriptor.zip",
+   "size": 158,
+   "entries": [
+    {
+     "name": "stream.txt",
+     "method": 8,
+     "flags": 8,
+     "crc": 684140889,
+     "csize": 24,
+     "usize": 510,
+     "lho": 0,
+     "comment": "",
+     "raw_time": 29033,
+     "raw_date": 23878,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "second": 18
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 40,
+     "local_name": "stream.txt"
+    }
+   ],
+   "comment": "",
+   "eocd": {
+    "offset": 136,
+    "entries": 1,
+    "cd_size": 56,
+    "cd_offset": 80,
+    "comment": "",
+    "trailing": 0
+   },
+   "zip64": false
+  },
+  {
+   "file": "empty.zip",
+   "size": 22,
+   "entries": [],
+   "comment": "",
+   "eocd": {
+    "offset": 0,
+    "entries": 0,
+    "cd_size": 0,
+    "cd_offset": 0,
+    "comment": "",
+    "trailing": 0
+   },
+   "zip64": false
+  },
+  {
+   "file": "prefix.zip",
+   "size": 843,
+   "entries": [
+    {
+     "name": "hello.txt",
+     "method": 8,
+     "flags": 0,
+     "crc": 2900700502,
+     "csize": 25,
+     "usize": 640,
+     "lho": 79,
+     "comment": "",
+     "raw_time": 29033,
+     "raw_date": 23878,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "second": 18
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 118,
+     "local_name": "hello.txt"
+    },
+    {
+     "name": "docs/readme.md",
+     "method": 0,
+     "flags": 0,
+     "crc": 1276834355,
+     "csize": 509,
+     "usize": 509,
+     "lho": 143,
+     "comment": "entry note",
+     "raw_time": 21440,
+     "raw_date": 22629,
+     "date": {
+      "year": 2024,
+      "month": 3,
+      "day": 5,
+      "hour": 10,
+      "minute": 30,
+      "second": 0
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 187,
+     "local_name": "docs/readme.md"
+    }
+   ],
+   "comment": "",
+   "eocd": {
+    "offset": 821,
+    "entries": 2,
+    "cd_size": 125,
+    "cd_offset": 617,
+    "comment": "",
+    "trailing": 0
+   },
+   "zip64": false
+  },
+  {
+   "file": "stored.zip",
+   "size": 368,
+   "entries": [
+    {
+     "name": "raw.bin",
+     "method": 0,
+     "flags": 0,
+     "crc": 688229491,
+     "csize": 256,
+     "usize": 256,
+     "lho": 0,
+     "comment": "",
+     "raw_time": 29033,
+     "raw_date": 23878,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "second": 18
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 37,
+     "local_name": "raw.bin"
+    }
+   ],
+   "comment": "",
+   "eocd": {
+    "offset": 346,
+    "entries": 1,
+    "cd_size": 53,
+    "cd_offset": 293,
+    "comment": "",
+    "trailing": 0
+   },
+   "zip64": false
+  },
+  {
+   "file": "trailing.zip",
+   "size": 776,
+   "entries": [
+    {
+     "name": "hello.txt",
+     "method": 8,
+     "flags": 0,
+     "crc": 2900700502,
+     "csize": 25,
+     "usize": 640,
+     "lho": 0,
+     "comment": "",
+     "raw_time": 29033,
+     "raw_date": 23878,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "second": 18
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 39,
+     "local_name": "hello.txt"
+    },
+    {
+     "name": "docs/readme.md",
+     "method": 0,
+     "flags": 0,
+     "crc": 1276834355,
+     "csize": 509,
+     "usize": 509,
+     "lho": 64,
+     "comment": "entry note",
+     "raw_time": 21440,
+     "raw_date": 22629,
+     "date": {
+      "year": 2024,
+      "month": 3,
+      "day": 5,
+      "hour": 10,
+      "minute": 30,
+      "second": 0
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 108,
+     "local_name": "docs/readme.md"
+    }
+   ],
+   "comment": "",
+   "eocd": {
+    "offset": 742,
+    "entries": 2,
+    "cd_size": 125,
+    "cd_offset": 617,
+    "comment": "",
+    "trailing": 12
+   },
+   "zip64": false
+  },
+  {
+   "file": "two_deflated.zip",
+   "size": 764,
+   "entries": [
+    {
+     "name": "hello.txt",
+     "method": 8,
+     "flags": 0,
+     "crc": 2900700502,
+     "csize": 25,
+     "usize": 640,
+     "lho": 0,
+     "comment": "",
+     "raw_time": 29033,
+     "raw_date": 23878,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 6,
+      "hour": 14,
+      "minute": 11,
+      "second": 18
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 39,
+     "local_name": "hello.txt"
+    },
+    {
+     "name": "docs/readme.md",
+     "method": 0,
+     "flags": 0,
+     "crc": 1276834355,
+     "csize": 509,
+     "usize": 509,
+     "lho": 64,
+     "comment": "entry note",
+     "raw_time": 21440,
+     "raw_date": 22629,
+     "date": {
+      "year": 2024,
+      "month": 3,
+      "day": 5,
+      "hour": 10,
+      "minute": 30,
+      "second": 0
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 108,
+     "local_name": "docs/readme.md"
+    }
+   ],
+   "comment": "",
+   "eocd": {
+    "offset": 742,
+    "entries": 2,
+    "cd_size": 125,
+    "cd_offset": 617,
+    "comment": "",
+    "trailing": 0
+   },
+   "zip64": false
+  },
+  {
+   "file": "zip64.zip",
+   "size": 143,
+   "entries": [
+    {
+     "name": "big.txt",
+     "method": 8,
+     "flags": 0,
+     "crc": 211183214,
+     "csize": 11,
+     "usize": 1000,
+     "lho": 0,
+     "comment": "",
+     "raw_time": 0,
+     "raw_date": 33,
+     "date": {
+      "year": 1980,
+      "month": 1,
+      "day": 1,
+      "hour": 0,
+      "minute": 0,
+      "second": 0
+     },
+     "content_ok": true,
+     "local_sig_ok": true,
+     "local_data_off": 57,
+     "local_name": "big.txt"
+    }
+   ],
+   "comment": "",
+   "eocd": {
+    "offset": 121,
+    "entries": 1,
+    "cd_size": 53,
+    "cd_offset": 68,
+    "comment": "",
+    "trailing": 0
+   },
+   "zip64": true
+  }
+ ]
+}
