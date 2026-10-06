@@ -99,7 +99,7 @@ function drawMap(res){
   });
   if(pos<res.size)map.appendChild(seg(pos,res.size-pos,'#2a3355','trailing @'+pos+' ('+(res.size-pos)+' bytes)'));
 }
-function seg(off,len,color,tip){var d=document.createElement('div');d.style.background=color;d.title=tip;return d;}
+function seg(off,len,color,tip){var d=document.createElement('div');d.style.background=color;d.style.flexGrow=len;d.title=tip;return d;}
 function drawTable(res){
   var tb=document.querySelector('#tbl tbody');tb.innerHTML='';
   res.entries.forEach(function(e){
