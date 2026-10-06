@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZipLens - about</title>
+<style>
+body{margin:0;background:#0b1020;color:#dbe4ff;font:15px/1.6 -apple-system,'Segoe UI',Roboto,sans-serif;padding:22px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:26px;margin:0 0 4px}h1 .z{color:#5ea0ff}
+a{color:#5ea0ff}.card{background:#141b2e;border:1px solid #263153;border-radius:10px;padding:14px 18px;margin:14px 0}
+code{background:#1b2440;border-radius:4px;padding:1px 5px;font-size:13px}
+.big{display:inline-block;margin-top:8px;background:#5ea0ff;color:#0b1020;font-weight:600;border-radius:8px;padding:10px 20px;text-decoration:none}
+.dim{color:#8b96b8}
+</style></head><body><main>
+<h1><span class="z">&#128230;</span> ZipLens</h1>
+<p class="dim">A ZIP archive inspector that runs entirely in your browser.</p>
+<div class="card">
+<b>What it shows</b>
+<ul>
+<li><b>Archive map</b> - every byte accounted for: local headers, compressed data, the central directory, zip64 records, the EOCD, and any junk before or after.</li>
+<li><b>Every entry</b> - compression method, packed/unpacked sizes, ratio, DOS timestamp, flags (encryption, data descriptors, UTF-8 names), entry comments, and real byte offsets.</li>
+<li><b>CRC-32 verification</b> - stored entries are checked directly; deflated entries are decompressed in-page with <code>DecompressionStream</code> and verified against their stored CRC.</li>
+<li><b>Structure warnings</b> - prepended self-extracting stubs, trailing junk, zip64 sentinels, local/central mismatches, unsupported methods, multi-disk spanning.</li>
+</ul>
+</div>
+<div class="card">
+<b>Why trust it</b>
+<p>The parser is checked against Python's real <code>zipfile</code> module: an oracle script derives every expected field (offsets, sizes, CRCs, DOS timestamps, comments) plus content CRCs recomputed with <code>zlib.crc32</code> over truly decompressed data. 262 checks pass over a corpus that includes stored, deflated, zip64-forced, stream-written (data descriptor), prefix-junk, and trailing-junk archives.</p>
+</div>
+<div class="card">
+<b>Privacy</b>
+<p>Your file never leaves the page. There is no server - this is a static site.</p>
+</div>
+<a class="big" href="app.html">Open ZipLens &rarr;</a>
+<p class="dim" style="margin-top:18px">Built by the hourly app factory. <a href="https://github.com/iLanis-agent/ziplens">Source on GitHub</a>.</p>
+</main></body></html>
