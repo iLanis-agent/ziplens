@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZipLens - ZIP archive inspector</title>
+<style>
+:root{--bg:#0b1020;--panel:#141b2e;--panel2:#1b2440;--fg:#dbe4ff;--dim:#8b96b8;--acc:#5ea0ff;--ok:#3ecf8e;--warn:#ffb454;--bad:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;padding:22px}
+h1{margin:0 0 4px;font-size:26px}h1 .z{color:var(--acc)}.sub{color:var(--dim);max-width:840px;margin-bottom:16px}
+.panel{background:var(--panel);border:1px solid #263153;border-radius:10px;padding:14px 16px;margin-bottom:14px;max-width:1060px}
+#drop{border:2px dashed #33406b;border-radius:10px;padding:22px;text-align:center;color:var(--dim);cursor:pointer}
+#drop.over{border-color:var(--acc);color:var(--fg)}
+.presets{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.presets button,.linkbtn{background:var(--panel2);color:var(--acc);border:1px solid #33406b;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:13px}
+.presets button:hover{border-color:var(--acc)}
+.warbox{background:#2a2113;border:1px solid #6b5426;color:var(--warn);border-radius:8px;padding:8px 12px;margin:10px 0;max-width:1060px;font-size:13px}
+#map{display:flex;height:34px;border-radius:6px;overflow:hidden;margin:8px 0 4px;background:#0e1430}
+#map div{min-width:2px;position:relative}
+#map div:hover{filter:brightness(1.35)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--dim);font-size:12px;margin-bottom:8px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;max-width:1060px;font-size:13.5px}
+th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #263153}
+th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+tr.e{cursor:pointer}tr.e:hover{background:var(--panel2)}tr.sel{background:#1f2a4d}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12.5px}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11.5px}
+.b-ok{background:#123324;color:var(--ok)}.b-bad{background:#3a1620;color:var(--bad)}.b-skip{background:#26243a;color:var(--dim)}.b-pend{background:#26243a;color:var(--warn)}
+#det{margin-top:12px}.kv{display:grid;grid-template-columns:170px 1fr;gap:2px 12px;font-size:13.5px}
+.kv .k{color:var(--dim)}
+a{color:var(--acc)}
+.sum{color:var(--dim);font-size:13px;margin:6px 0 0}
+</style></head><body>
+<h1><span class="z">&#128230;</span> ZipLens</h1>
+<div class="sub">Drop a .zip and see its real structure - local headers, the central directory, zip64 records, EOCD - plus CRC-32 content verification against every stored and deflated entry. All in your browser; files never leave the page. Verified byte-for-byte against Python's zipfile. <a href="index.html">About</a></div>
+<div class="panel">
+  <div id="drop">Drop a ZIP file here, or click to choose<input type="file" id="file" style="display:none"></div>
+  <div class="presets" id="presets"></div>
+</div>
+<div id="out" style="display:none">
+  <div id="warns"></div>
+  <div class="panel">
+    <b>Archive map</b> <span class="sum" id="sumline"></span>
+    <div id="map"></div>
+    <div class="legend">
+      <span><span class="sw" style="background:#5ea0ff"></span>local header</span>
+      <span><span class="sw" style="background:#3ecf8e"></span>file data</span>
+      <span><span class="sw" style="background:#a879e8"></span>central directory</span>
+      <span><span class="sw" style="background:#ffb454"></span>EOCD</span>
+      <span><span class="sw" style="background:#ff6b6b"></span>zip64 records</span>
+      <span><span class="sw" style="background:#2a3355"></span>gaps / junk</span>
+    </div>
+  </div>
+  <div class="panel">
+    <table id="tbl"><thead><tr><th>#</th><th>name</th><th>method</th><th>size</th><th>packed</th><th>ratio</th><th>modified</th><th>CRC</th></tr></thead><tbody></tbody></table>
+    <div id="det"></div>
+  </div>
+</div>
+<script src="engine.js?v=380"></script>
+<script>
+var PRESETS={"two deflated files": "UEsDBBQAAAAIAGlxRl1WLeWsGQAAAIACAAAJAAAAaGVsbG8udHh0y0jNyclXqMosUCjPL8pJ4coY5Y/y6cgHAFBLAwQUAAAAAADAU2VYM/IaTP0BAAD9AQAADgAAAGRvY3MvcmVhZG1lLm1kIyByZWFkbWUKeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHhQSwECFAMUAAAACABpcUZdVi3lrBkAAACAAgAACQAAAAAAAAAAAAAAgAEAAAAAaGVsbG8udHh0UEsBAhQDFAAAAAAAwFNlWDPyGkz9AQAA/QEAAA4AAAAKAAAAAAAAAIABQAAAAGRvY3MvcmVhZG1lLm1kZW50cnkgbm90ZVBLBQYAAAAAAgACAH0AAABpAgAAAAA=", "stored (no compression)": "UEsDBBQAAAAAAGlxRl1zjAUpAAEAAAABAAAHAAAAcmF3LmJpbgABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v9QSwECFAMUAAAAAABpcUZdc4wFKQABAAAAAQAABwAAAAAAAAAAAAAAgAEAAAAAcmF3LmJpblBLBQYAAAAAAQABADUAAAAlAQAAAAA=", "zip64 forced": "UEsDBBQAAAAIAAAAIQBuZpYMCwAAAOgDAAAHABQAYmlnLnR4dAEAEADoAwAAAAAAAAsAAAAAAAAAq6oaBaNgFAx3AABQSwECFAMUAAAACAAAACEAbmaWDAsAAADoAwAABwAAAAAAAAAAAAAAgAEAAAAAYmlnLnR4dFBLBQYAAAAAAQABADUAAABEAAAAAAA=", "data descriptor (streamed)": "UEsDBBQACAAIAGlxRl0AAAAAAAAAAAAAAAAKAAAAc3RyZWFtLnR4dCsuKUpNzE1NUUjOzytJzSvhKh4VGDkCAFBLBwhZKccoGAAAAP4BAABQSwECFAMUAAgACABpcUZdWSnHKBgAAAD+AQAACgAAAAAAAAAAAAAAgAEAAAAAc3RyZWFtLnR4dFBLBQYAAAAAAQABADgAAABQAAAAAAA=", "sfx prefix (79 junk bytes)": "IyEvYmluL3NoIHN0dWIKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFBLAwQUAAAACABpcUZdVi3lrBkAAACAAgAACQAAAGhlbGxvLnR4dMtIzcnJV6jKLFAozy/KSeHKGOWP8unIBwBQSwMEFAAAAAAAwFNlWDPyGkz9AQAA/QEAAA4AAABkb2NzL3JlYWRtZS5tZCMgcmVhZG1lCnh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4UEsBAhQDFAAAAAgAaXFGXVYt5awZAAAAgAIAAAkAAAAAAAAAAAAAAIABAAAAAGhlbGxvLnR4dFBLAQIUAxQAAAAAAMBTZVgz8hpM/QEAAP0BAAAOAAAACgAAAAAAAACAAUAAAABkb2NzL3JlYWRtZS5tZGVudHJ5IG5vdGVQSwUGAAAAAAIAAgB9AAAAaQIAAAAA", "trailing junk": "UEsDBBQAAAAIAGlxRl1WLeWsGQAAAIACAAAJAAAAaGVsbG8udHh0y0jNyclXqMosUCjPL8pJ4coY5Y/y6cgHAFBLAwQUAAAAAADAU2VYM/IaTP0BAAD9AQAADgAAAGRvY3MvcmVhZG1lLm1kIyByZWFkbWUKeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHhQSwECFAMUAAAACABpcUZdVi3lrBkAAACAAgAACQAAAAAAAAAAAAAAgAEAAAAAaGVsbG8udHh0UEsBAhQDFAAAAAAAwFNlWDPyGkz9AQAA/QEAAA4AAAAKAAAAAAAAAIABQAAAAGRvY3MvcmVhZG1lLm1kZW50cnkgbm90ZVBLBQYAAAAAAgACAH0AAABpAgAAAABUUkFJTElOR0pVTks="};
+var COLORS={local:'#5ea0ff',data:'#3ecf8e',central:'#a879e8',eocd:'#ffb454',eocd64:'#ff6b6b',eocd64loc:'#ff6b6b'};
+var cur={bytes:null,res:null,name:''};
+function b64bytes(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+function fmt(n){if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(1)+' MB';}
+Object.keys(PRESETS).forEach(function(k){
+  var b=document.createElement('button');b.textContent=k;
+  b.onclick=function(){load(b64bytes(PRESETS[k]),k+'.zip');};
+  document.getElementById('presets').appendChild(b);
+});
+var drop=document.getElementById('drop'),file=document.getElementById('file');
+drop.onclick=function(){file.click();};
+file.onchange=function(){if(file.files[0])readFile(file.files[0]);};
+drop.ondragover=function(e){e.preventDefault();drop.classList.add('over');};
+drop.ondragleave=function(){drop.classList.remove('over');};
+drop.ondrop=function(e){e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0]);};
+function readFile(f){var r=new FileReader();r.onload=function(){load(new Uint8Array(r.result),f.name);};r.readAsArrayBuffer(f);}
+function load(bytes,name){
+  cur.bytes=bytes;cur.name=name;
+  var res=ZipLens.parseZip(bytes);cur.res=res;
+  document.getElementById('out').style.display='block';
+  var w=document.getElementById('warns');w.innerHTML='';
+  res.errors.forEach(function(e){w.innerHTML+='<div class="warbox" style="background:#3a1620;border-color:#7a2c3c;color:#ff6b6b">'+esc(e)+'</div>';});
+  res.warnings.forEach(function(e){w.innerHTML+='<div class="warbox">'+esc(e)+'</div>';});
+  var eocd=res.eocd||{};
+  document.getElementById('sumline').textContent=res.entries.length+' entries, archive '+fmt(res.size)+(eocd.comment?', comment: "'+eocd.comment+'"':'')+(res.zip64?', zip64':'')+(res.concat_shift?', concat shift '+res.concat_shift:'');
+  drawMap(res);
+  drawTable(res);
+  document.getElementById('det').innerHTML='';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function drawMap(res){
+  var map=document.getElementById('map');map.innerHTML='';
+  var segs=res.segments.slice().sort(function(a,b){return a.off-b.off;});
+  var pos=0;
+  segs.forEach(function(s){
+    if(s.off>pos){map.appendChild(seg(pos,s.off-pos,'#2a3355','gap @'+pos+' ('+(s.off-pos)+' bytes - junk/prefix)'));}
+    map.appendChild(seg(s.off,s.len,COLORS[s.kind]||'#888',s.kind+(s.entry?' #'+s.entry:'')+' @'+s.off+' ('+s.len+' bytes)'));
+    pos=s.off+s.len;
+  });
+  if(pos<res.size)map.appendChild(seg(pos,res.size-pos,'#2a3355','trailing @'+pos+' ('+(res.size-pos)+' bytes)'));
+}
+function seg(off,len,color,tip){var d=document.createElement('div');d.style.background=color;d.title=tip;return d;}
+function drawTable(res){
+  var tb=document.querySelector('#tbl tbody');tb.innerHTML='';
+  res.entries.forEach(function(e){
+    var tr=document.createElement('tr');tr.className='e';
+    var d=e.date;
+    var ratio=e.usize?Math.round(100*(1-e.csize/e.usize))+'%':'-';
+    tr.innerHTML='<td>'+e.index+'</td><td class="mono">'+esc(e.name)+'</td><td>'+e.method_name+'</td><td>'+fmt(e.usize)+'</td><td>'+fmt(e.csize)+'</td><td>'+ratio+'</td><td class="mono">'+d.year+'-'+p2(d.month)+'-'+p2(d.day)+' '+p2(d.hour)+':'+p2(d.minute)+'</td><td><span class="badge b-pend" id="crc'+e.index+'">checking</span></td>';
+    tr.onclick=function(){
+      document.querySelectorAll('tr.e').forEach(function(r){r.classList.remove('sel');});
+      tr.classList.add('sel');showDet(e);
+    };
+    tb.appendChild(tr);
+    ZipLens.verifyEntry(cur.bytes,e).then(function(v){
+      var b=document.getElementById('crc'+e.index);
+      if(v==='ok'){b.className='badge b-ok';b.textContent='ok';}
+      else if(v==='skipped'){b.className='badge b-skip';b.textContent='unchecked';}
+      else{b.className='badge b-bad';b.textContent=v;}
+    });
+  });
+}
+function p2(n){return String(n).padStart(2,'0');}
+function flags(e){var f=[];if(e.encrypted)f.push('encrypted');if(e.data_descriptor)f.push('data descriptor');if(e.utf8)f.push('utf-8 names');if(!f.length)f.push('none');return f.join(', ');}
+function showDet(e){
+  var d=e.date,rows=[
+    ['name',esc(e.name)],['method',e.method_name+' ('+e.method+')'],['flags',flags(e)+' (0x'+e.flags.toString(16)+')'],
+    ['CRC-32','0x'+('00000000'+e.crc.toString(16)).slice(-8)],['sizes',e.usize+' bytes uncompressed, '+e.csize+' packed'],
+    ['modified',d.year+'-'+p2(d.month)+'-'+p2(d.day)+' '+p2(d.hour)+':'+p2(d.minute)+':'+p2(d.second)+' (DOS time, 2s resolution)'],
+    ['central record','offset '+e.cd_offset],['local header','offset '+e.lho+(e.local?', data starts at '+e.local.data_off:'')],
+    ['zip64 extra',e.zip64?'yes':'no'],['entry comment',e.comment?esc(e.comment):'(none)']];
+  var h='<div class="panel" style="background:var(--panel2)"><b>'+esc(e.name)+'</b><div class="kv">';
+  rows.forEach(function(r){h+='<div class="k">'+r[0]+'</div><div>'+r[1]+'</div>';});
+  document.getElementById('det').innerHTML=h+'</div></div>';
+}
+</script></body></html>
